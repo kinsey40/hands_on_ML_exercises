@@ -1,0 +1,11 @@
+# Ignore the pycache folders
+
+chapter_1/__pycache__/*
+chapter_2/__pycache__/*
+chapter_3/__pycache__/*
+
+# Ignore the data
+data/*
+
+# Ignore the virtual env
+env/*
