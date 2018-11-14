@@ -41,7 +41,9 @@ If none are ready, it will block unless default is defined
 
 package main
 
-import "fmt"
+import (
+	"sort"
+)
 
 type Record map[string]interface{}
 type Records []Record
@@ -50,7 +52,8 @@ type DirectionGroup map[string]Records
 type CountryGroup map[string]DirectionGroup
 type IdGroup map[string]CountryGroup
 
-func (grouped IdGroup) appendRecord(record Record) {
+func (grp *IdGroup) appendRecord(record Record) {
+	grouped := *grp
 	if grouped[record["Ats_ident"].(string)] == nil {
 		country := make(CountryGroup)
 		direction := make(DirectionGroup)
@@ -81,7 +84,30 @@ func main() {
 	r["Cax"] = "Cax"
 	r["Ctry"] = "US"
 	r["Direction"] = "E"
+	r["Number"] = 1
 	r["Ats_ident"] = "US435"
+
+	x := make(Record)
+	x["Foo"] = "Foo"
+	x["Bar"] = "Bar"
+	x["Baz"] = "Baz"
+	x["Bax"] = "Bax"
+	x["Cax"] = "Cax"
+	x["Ctry"] = "US"
+	x["Direction"] = "E"
+	x["Number"] = 2
+	x["Ats_ident"] = "US435"
+
+	y := make(Record)
+	y["Foo"] = "Foo"
+	y["Bar"] = "Bar"
+	y["Baz"] = "Baz"
+	y["Bax"] = "Bax"
+	y["Cax"] = "Cax"
+	y["Ctry"] = "US"
+	y["Direction"] = "E"
+	y["Number"] = 3
+	y["Ats_ident"] = "US435"
 
 	s := make(Record)
 	s["Foo"] = "Foo"
@@ -91,6 +117,7 @@ func main() {
 	s["Cax"] = "Cax"
 	s["Ctry"] = "US"
 	s["Direction"] = "W"
+	s["Number"] = 1
 	s["Ats_ident"] = "US435"
 
 	t := make(Record)
@@ -101,6 +128,7 @@ func main() {
 	t["Cax"] = "Cax"
 	t["Ctry"] = "UK"
 	t["Direction"] = "W"
+	t["Number"] = 1
 	t["Ats_ident"] = "US435"
 
 	u := make(Record)
@@ -111,13 +139,30 @@ func main() {
 	u["Cax"] = "Cax"
 	u["Ctry"] = "UK"
 	u["Direction"] = "W"
+	u["Number"] = 1
 	u["Ats_ident"] = "US999"
 
 	grouped.appendRecord(r)
 	grouped.appendRecord(s)
 	grouped.appendRecord(t)
 	grouped.appendRecord(u)
+	grouped.appendRecord(y)
+	grouped.appendRecord(x)
 
-	fmt.Println(grouped)
+	uniqueATSVals := [2]string{"US435", "US999"}
+	uniqueCtryVals := [2]string{"US", "UK"}
+	uniqueDirections := [2]string{"E", "W"}
+
+	for _, atsIdent := range uniqueATSVals {
+		for _, country := range uniqueCtryVals {
+			for _, direction := range uniqueDirections {
+				records := grouped[atsIdent][country][direction]
+				sort.Slice(records[:], func(i, j int) bool {
+					return records[i]["Number"].(int) < records[j]["Number"].(int)
+				})
+				//fmt.Println(atsIdent, country, direction, records)
+			}
+		}
+	}
 
 }
